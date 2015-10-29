@@ -20,7 +20,7 @@ int main() {
     return 1;
   }
     //WebSocket (WS)-server at port 8080 using 4 threads
-    WsServer server(8080, 4);
+    WsServer server(8080, 8);
     
     //Example 1: echo WebSocket endpoint
     //  Added debug messages for example use of the callbacks
@@ -34,8 +34,8 @@ int main() {
 
       //std::cout << connection->cd_user_ptr->name << std::endl;
 
-      auto message_str=message->string();
-
+      
+      auto message_str=message->string();  
       string err;
       auto payload = Json::parse(message_str, err);
 
@@ -48,11 +48,14 @@ int main() {
 	
 	if ( cd_handler_md::get().m.find(h) == cd_handler_md::get().m.end() ) {
 	  std::cout << "[error] 핸들러 없음" << std::endl;
+	  server.send_close(connection, 2);
 	} else {
+
 	  bool r = cd_handler_md::get().m[h](connection->cd_user_ptr, payload);
 	  if(!r) {
 	    std::cout << "[error] 핸들러 콜백 처리중" << std::endl;
 	  }
+
 	}
 
 
@@ -60,8 +63,18 @@ int main() {
 
 
 
-      // json으로 변환
-      
+     
+      /* 
+      for(auto a_connection: server.get_connections()) {
+	std::cout << "size: " << server.get_connections().size() << std::endl;
+	auto send_stream=make_shared<WsServer::SendStream>();
+	*send_stream << message_str;
+
+	server.send(a_
+connection, send_stream);
+      }
+*/
+
         //WsServer::Message::string() is a convenience function for:
         //stringstream data_ss;
         //data_ss << message->rdbuf();
@@ -92,6 +105,8 @@ int main() {
       	
 	std::shared_ptr<cd_user> user = std::make_shared<cd_user>(server, connection);
 	connection->cd_user_ptr = user;
+
+	vs_room_md::get().users.push_back(user);
 	//connection->cd_user_ptr = std::unique_ptr<cd_user>(new cd_user(server, connection));
 
     };

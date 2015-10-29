@@ -54,6 +54,10 @@ void vs_room_md::leave_room(user_ptr user) {
 
 }
 
+boost::asio::io_service& vs_room_md::get_io_service() {
+  return io_service_;
+}
+
 /*
 pvp_room_ptr pvp_room_md::create() {
   pvp_room_ptr p = std::make_shared<pvp_room>();

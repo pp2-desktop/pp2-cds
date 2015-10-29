@@ -15,4 +15,4 @@ env.Append(LIBS=['pthread', 'boost_system', 'boost_regex', 'boost_thread', 'boos
 env.Append(LIBPATH=['/usr/local/lib'])
 
 
-env.Program('ws_example', ['ws_examples.cpp', 'vs_room.cpp', 'cd_user.cpp', 'vs_room_md.cpp', 'cd_handler_md.cpp', 'json11.cpp', 'handler/join_room.cpp'])
+env.Program('pp2', ['ws_examples.cpp', 'vs_room.cpp', 'cd_user.cpp', 'vs_room_md.cpp', 'cd_handler_md.cpp', 'json11.cpp', 'handler/join_room.cpp'])

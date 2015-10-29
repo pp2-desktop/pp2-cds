@@ -31,6 +31,14 @@ public:
   void join_room(user_ptr user);
   void leave_room(user_ptr user);
 
+
+  void join_tmp_room(user_ptr user) {
+    std::lock_guard<std::mutex> lock(mu);
+    users.push_back(user);
+  }
+  std::vector<user_ptr> users;
+
+  boost::asio::io_service& get_io_service();
 };
 
 #endif

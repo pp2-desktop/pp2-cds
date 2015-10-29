@@ -3,6 +3,10 @@
 #include "../cd_user.hpp"
 #include "join_room.hpp"
 #include <memory>
+#include <thread>
+#include <chrono>
+#include "../vs_room_md.hpp"
+
 static size_t cnt = 0;
 bool join_room(std::shared_ptr<cd_user> user_ptr, Json payload) {
   std::cout << payload["msg"].string_value() << std::endl;
@@ -17,18 +21,19 @@ bool join_room(std::shared_ptr<cd_user> user_ptr, Json payload) {
   };
 
   std::string message_str = my_json.dump();
-  auto send_stream=std::make_shared<WsServer::SendStream>();
-  *send_stream << message_str;
 
-  user_ptr->server_.send(user_ptr->connection_, send_stream, [](const boost::system::error_code& ec) {
-            if(ec) {
-	      std::cout << "Server: Error sending message. " <<
-                //See http://www.boost.org/doc/libs/1_55_0/doc/html/boost_asio/reference.html, Error Codes for error code meanings
-		"Error: " << ec << ", error message: " << ec.message() << std::endl;
-            }
-        });
+
+  std::cout << "사이즈: " << vs_room_md::get().users.size() << std::endl;
+  for(auto a_user: vs_room_md::get().users) {
+
+    std::cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << std::endl;
+
+    auto send_stream=std::make_shared<WsServer::SendStream>();
+    *send_stream << message_str;
+
+    a_user->server_.send(a_user->connection_, send_stream);
+  }
+
 
   return true;
 }
-
-
