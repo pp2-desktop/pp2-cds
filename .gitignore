@@ -1,0 +1,7 @@
+*.o
+core
+ws_example
+CMakeFiles/
+CMakeLists.txt
+.sconsign.dblite
+
