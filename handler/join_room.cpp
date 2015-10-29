@@ -8,8 +8,15 @@ bool join_room(std::shared_ptr<cd_user> user_ptr, Json payload) {
   std::cout << payload["msg"].string_value() << std::endl;
 
   std::cout << "받은 횟수: " << cnt++ << std::endl;
-  
-  std::string message_str = "sex";
+
+
+  Json my_json = Json::object {
+    { "key1", "value1" },
+    { "key2", false },
+    { "key3", Json::array { 1, 2, 3 } },
+  };
+
+  std::string message_str = my_json.dump();
   auto send_stream=std::make_shared<WsServer::SendStream>();
   *send_stream << message_str;
 
