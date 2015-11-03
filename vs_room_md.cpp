@@ -38,20 +38,41 @@ void vs_room_md::join_room(user_ptr user) {
   for(auto& p : vs_rooms) {
     if(!p.second->is_full()) {
       // 방에 자리가 있다면
+      std::cout << "[debug] 유저가 있어서 상대로 들어감" << std::endl;
       p.second->join_as_opponent(user);
       return;
     }
   }
 
-  gen_cnt++;
-  vs_room_ptr r = std::make_shared<vs_room>(io_service_, gen_cnt);
+  auto r = std::make_shared<vs_room>(io_service_, gen_cnt);
   vs_rooms.insert(std::make_pair(gen_cnt, r));
   r->join_as_master(user);
+  gen_cnt++;
 }
 
 void vs_room_md::leave_room(user_ptr user) {
   std::lock_guard<std::mutex> lock(mu);
 
+  auto rid = user->get_vs_room()->get_id();
+
+  auto it = vs_rooms.find(rid);
+  if (it != vs_rooms.end()) {
+    it->second->leave_user(user); 
+
+  } else {
+    std::cout << "[error] 유저가 방을 나갈려 했지만 방이 존재하지 않음" << std::endl; 
+  }
+  
+  if(it != vs_rooms.end()) {
+    std::cout << "[debug] 방 삭제전 사이즈: " << vs_rooms.size() << std::endl; 
+    if(it->second->master_user_ptr == nullptr && it->second->opponent_user_ptr == nullptr) {
+      vs_rooms.erase(it);
+    } else {
+      std::cout << "[debug] 방에 유저가 있어서 삭제 안함" << std::endl;       
+    }
+    std::cout << "[debug] 방 삭제후 사이즈: " << vs_rooms.size() << std::endl; 
+  }
+  
 }
 
 boost::asio::io_service& vs_room_md::get_io_service() {

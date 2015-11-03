@@ -34,8 +34,8 @@ int main() {
 
       //std::cout << connection->cd_user_ptr->name << std::endl;
 
-      
-      auto message_str=message->string();  
+      auto message_str=message->string();
+      //std::cout << "받은 데이터 사이즈: " << message_str.size() << std::endl;
       string err;
       auto payload = Json::parse(message_str, err);
 
@@ -106,7 +106,7 @@ connection, send_stream);
 	std::shared_ptr<cd_user> user = std::make_shared<cd_user>(server, connection);
 	connection->cd_user_ptr = user;
 
-	vs_room_md::get().users.push_back(user);
+	//vs_room_md::get().users.push_back(user);
 	//connection->cd_user_ptr = std::unique_ptr<cd_user>(new cd_user(server, connection));
 
     };
@@ -114,6 +114,7 @@ connection, send_stream);
     //See RFC 6455 7.4.1. for status codes
     echo.onclose=[](shared_ptr<WsServer::Connection> connection, int status, const string& reason) {
         cout << "Server: Closed connection " << (size_t)connection.get() << " with status code " << status << endl;
+	connection->cd_user_ptr->destory();
 	connection->cd_user_ptr = nullptr;
     };
     
@@ -122,6 +123,7 @@ connection, send_stream);
         cout << "Server: Error in connection " << (size_t)connection.get() << ". " << 
                 "Error: " << ec << ", error message: " << ec.message() << endl;
 
+	connection->cd_user_ptr->destory();
 	connection->cd_user_ptr = nullptr;
     };
     

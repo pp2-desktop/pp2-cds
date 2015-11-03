@@ -6,7 +6,7 @@
 #include <boost/asio.hpp>
 #include "cd_user.hpp"
 
-typedef std::shared_ptr<cd_user> user_ptr;  
+typedef std::shared_ptr<cd_user> user_ptr; 
 
 struct vec2 {
   int x;
@@ -36,13 +36,13 @@ public:
 
 };
 
-class vs_room {
+class vs_room: public std::enable_shared_from_this<vs_room> {
 
   enum ROOM_STATUS { LOBBY, PLAYING, END };
 
   std::mutex m;
   ROOM_STATUS room_status;
-  size_t rid_;
+  int rid_;
 
   bool is_opponent_ready_;
   boost::asio::io_service& io_service_;
@@ -51,12 +51,12 @@ public:
   user_ptr master_user_ptr;
   user_ptr opponent_user_ptr;
 
-  vs_room(boost::asio::io_service& io_service, size_t rid);
+  vs_room(boost::asio::io_service& io_service, int rid);
   ~vs_room();
 
 
   bool is_full();
-  size_t get_id();
+  int get_id();
 
   void join_as_master(user_ptr user);
   void join_as_opponent(user_ptr user);

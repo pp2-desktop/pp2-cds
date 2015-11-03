@@ -21,8 +21,15 @@ public:
   
 };
 */
+class vs_room;
+typedef std::shared_ptr<vs_room> vs_room_ptr; 
 
-class cd_user {
+class cd_user: public std::enable_shared_from_this<cd_user> { 
+
+  std::atomic<bool> is_seat_;
+  bool is_master_;
+  vs_room_ptr vs_room_ptr_;
+
 public:
   cd_user(WsServer& server, std::shared_ptr<WsServer::Connection> connection_ptr);
   ~cd_user();
@@ -32,6 +39,22 @@ public:
   std::shared_ptr<WsServer::Connection> connection_;
 
   std::string name;
+
+
+  void set_is_seat(bool);
+  bool get_is_seat();
+ 
+  void set_is_master(bool);
+  bool get_is_master();
+
+  void set_vs_room(vs_room_ptr r);
+  void destory();
+
+  vs_room_ptr& get_vs_room() { return vs_room_ptr_; }
+
+  void send(std::string payload);
+
+  void destroy_vs_room();
 
 };
 
