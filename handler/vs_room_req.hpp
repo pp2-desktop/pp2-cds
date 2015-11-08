@@ -8,7 +8,7 @@ using namespace json11;
 
 class cd_user;
 
-bool sample_req(std::shared_ptr<cd_user>, Json);
-//bool logout_req(std::shared_ptr<cd_user>, Json);
+bool opponent_ready_notify(std::shared_ptr<cd_user>, Json);
+bool start_vs_game_req(std::shared_ptr<cd_user> user_ptr, Json);
 
 #endif

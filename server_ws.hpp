@@ -51,7 +51,9 @@ public:
 
     std::unique_ptr<boost::asio::deadline_timer> timer_idle;
 
-    Connection(socket_type *socket): socket(socket), closed(false) {}
+    Connection(socket_type *socket): socket(socket), closed(false) {
+      std::cout << "connection 생성자 called" << std::endl;
+    }
             
     void read_remote_endpoint_data() {
       try {

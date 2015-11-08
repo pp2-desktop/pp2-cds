@@ -53,6 +53,7 @@ public:
   void destory();
 
   vs_room_ptr& get_vs_room() { return vs_room_ptr_; }
+  vs_room* get_vs_room_ptr() { return vs_room_ptr_.get(); }
 
   void send(std::string payload);
   void send2(json11::Json payload);

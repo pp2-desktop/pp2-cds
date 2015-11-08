@@ -5,16 +5,44 @@
 #include <chrono>
 #include "user_info_req.hpp"
 #include "../cd_user.hpp"
+#include "../vs_room.hpp"
 
-bool sample_req(std::shared_ptr<cd_user> user_ptr, Json) {
+bool opponent_ready_notify(std::shared_ptr<cd_user> user_ptr, Json) {
 
-  json11::Json res = json11::Json::object {
-    { "type", "login_res" },
-    { "uid", user_ptr->get_uid() }
-  };
-
-  user_ptr->send2(res);
-
+  auto room_ptr = user_ptr->get_vs_room_ptr();
+  
+  if(room_ptr) {
+    auto master_user_ptr = room_ptr->master_user_ptr;
+    if(master_user_ptr) {
+      master_user_ptr->send2(json11::Json::object {
+	  { "type", "opponent_ready_notify" }
+	});
+    } 
+  }
   return true;
 }
 
+
+bool start_vs_game_req(std::shared_ptr<cd_user> user_ptr, Json) {
+
+  std::cout << "게임 시작 메시지 받음" << std::endl;
+
+  auto room_ptr = user_ptr->get_vs_room_ptr();
+
+  auto res = json11::Json::object{ 
+    { "type", "start_vs_game_res" }
+  };
+  
+  if(room_ptr) {
+    auto master_user_ptr = room_ptr->master_user_ptr;
+    if(master_user_ptr) {
+      master_user_ptr->send2(res);
+    }
+    auto opponent_user_ptr = room_ptr->master_user_ptr;
+    if(opponent_user_ptr) {
+      opponent_user_ptr->send2(res);
+    }
+  }
+  
+  return true;
+}

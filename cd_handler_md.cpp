@@ -25,7 +25,8 @@ bool cd_handler_md::init() {
   r &= add_payload("leave_room_req", leave_room_req);
   r &= add_payload("login_req", login_req);
   r &= add_payload("logout_req", logout_req);
-  r &= add_payload("sample_req", sample_req);
+  r &= add_payload("opponent_ready_notify", opponent_ready_notify);
+  r &= add_payload("start_vs_game_req", start_vs_game_req);
 
   std::cout << r << std::endl;
   return r;
