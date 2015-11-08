@@ -3,7 +3,7 @@
 
 #include <memory>
 #include "server_ws.hpp"
-
+#include "json11.hpp"
 typedef SocketServer<WS> WsServer;
 /*
 class room_info {
@@ -30,6 +30,8 @@ class cd_user: public std::enable_shared_from_this<cd_user> {
   bool is_master_;
   vs_room_ptr vs_room_ptr_;
 
+  std::string uid_;
+  
 public:
   cd_user(WsServer& server, std::shared_ptr<WsServer::Connection> connection_ptr);
   ~cd_user();
@@ -53,9 +55,12 @@ public:
   vs_room_ptr& get_vs_room() { return vs_room_ptr_; }
 
   void send(std::string payload);
+  void send2(json11::Json payload);
 
   void destroy_vs_room();
 
+  void set_uid(const std::string& uid) { uid_ = uid; }  
+  std::string get_uid() { return uid_; }
 };
 
 #endif

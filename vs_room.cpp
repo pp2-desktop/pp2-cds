@@ -61,8 +61,14 @@ void vs_room::join_as_opponent(user_ptr user) {
   user->set_is_seat(true);
   user->set_is_master(false);
   user->set_vs_room(shared_from_this());
-  
   user->send(res.dump());
+
+
+  json11::Json n = json11::Json::object {
+    { "type", "join_opponent_notify" },
+    { "uid", user->get_uid()}
+  };
+  master_user_ptr->send2(n);
 }
 
 void vs_room::leave_user(user_ptr user) {
@@ -71,29 +77,39 @@ void vs_room::leave_user(user_ptr user) {
     if(master_user_ptr.get() == user.get()) {
       if(opponent_user_ptr != nullptr) { 
 	master_user_ptr = opponent_user_ptr;
+	opponent_user_ptr.reset();
 	opponent_user_ptr = nullptr;
 	
 	master_user_ptr->set_is_master(true);
 	//master_user_ptr 한테 너 방장됬다고 메세지 보내줌
 
-	json11::Json res = json11::Json::object {
-	  { "type", "notify_user_leave" },
+	json11::Json n = json11::Json::object {
+	  { "type", "master_leave_notify" },
 	  { "is_master", true },
 	};
-	master_user_ptr->send(res.dump());
+	master_user_ptr->send(n.dump());
 
 	std::cout << "[debug] 방장이 나가서 상대가 방장이 됨" << std::endl;
       } else {
 
 	std::cout << "[debug] 방장이 나가서 방 삭제" << std::endl;
+	master_user_ptr.reset();
 	master_user_ptr = nullptr;
+	opponent_user_ptr.reset();
 	opponent_user_ptr = nullptr;
       }
 
     } else {
       std::cout << "[debug] 상대가 나가고 방장만 혼자 있는 상태" << std::endl;
+
+      json11::Json n = json11::Json::object {
+	{ "type", "opponent_leave_notify" },
+	{ "uid", opponent_user_ptr->get_uid() },
+      };
+      master_user_ptr->send2(n);
+
+      opponent_user_ptr.reset();
       opponent_user_ptr = nullptr;
-      // 방장에게 상대가 나갔다고 알려줌
     }
 
     user->destroy_vs_room();

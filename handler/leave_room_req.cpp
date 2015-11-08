@@ -20,7 +20,7 @@ bool leave_room_req(std::shared_ptr<cd_user> user_ptr, Json payload) {
   vs_room_md::get().leave_room(user_ptr);
 
   json11::Json res = json11::Json::object {
-    { "type", "leave_vs_room_res" },
+    { "type", "leave_room_res" },
     { "result", true }
   };
   user_ptr->send(res.dump());

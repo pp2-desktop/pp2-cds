@@ -35,14 +35,13 @@ int main() {
       //std::cout << connection->cd_user_ptr->name << std::endl;
 
       auto message_str=message->string();
-      //std::cout << "받은 데이터 사이즈: " << message_str.size() << std::endl;
+      std::cout << "[payload]: " << message_str << std::endl;
       string err;
       auto payload = Json::parse(message_str, err);
 
       if (!err.empty()) {
 	std::cout<< "[error] fail to parse json " << err.c_str() << std::endl;
       } else {
-	//std::cout<< "[debug] json: " << payload.dump().c_str() << std::endl;
 
 	std::string h = payload["type"].string_value();
 	
@@ -105,6 +104,8 @@ connection, send_stream);
       	
 	std::shared_ptr<cd_user> user = std::make_shared<cd_user>(server, connection);
 	connection->cd_user_ptr = user;
+	// 잠시 고유 아이디로 설정
+	user->set_uid(std::to_string((size_t)connection.get()));
 
 	//vs_room_md::get().users.push_back(user);
 	//connection->cd_user_ptr = std::unique_ptr<cd_user>(new cd_user(server, connection));

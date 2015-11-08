@@ -51,6 +51,10 @@ void cd_user::send(std::string payload) {
   server_.send(connection_, send_stream);
 }
 
+void cd_user::send2(json11::Json payload) {
+  send(payload.dump());
+}
+
 void cd_user::destroy_vs_room() {
   is_seat_ = false;
   is_master_ = false;
