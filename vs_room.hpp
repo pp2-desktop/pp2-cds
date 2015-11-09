@@ -5,6 +5,9 @@
 #include <vector>
 #include <boost/asio.hpp>
 #include "cd_user.hpp"
+#include "json11.hpp"
+
+using namespace json11;
 
 typedef std::shared_ptr<cd_user> user_ptr; 
 
@@ -15,6 +18,7 @@ struct vec2 {
     x = _x;
     y = _y;
   }
+  Json to_json() const { return Json::array { x, y }; }
 };
 
 class round {

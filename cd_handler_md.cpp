@@ -5,6 +5,7 @@
 #include "handler/leave_room_req.hpp"
 #include "handler/user_info_req.hpp"
 #include "handler/vs_room_req.hpp"
+#include "handler/vs_play_req.hpp"
 
 cd_handler_md::cd_handler_md() {
 
@@ -27,6 +28,7 @@ bool cd_handler_md::init() {
   r &= add_payload("logout_req", logout_req);
   r &= add_payload("opponent_ready_notify", opponent_ready_notify);
   r &= add_payload("start_vs_game_req", start_vs_game_req);
+  r &= add_payload("round_info_req", round_info_req);
 
   std::cout << r << std::endl;
   return r;
