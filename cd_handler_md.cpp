@@ -29,6 +29,7 @@ bool cd_handler_md::init() {
   r &= add_payload("opponent_ready_notify", opponent_ready_notify);
   r &= add_payload("start_vs_game_req", start_vs_game_req);
   r &= add_payload("round_info_req", round_info_req);
+  r &= add_payload("start_round_req", start_round_req);
 
   std::cout << r << std::endl;
   return r;

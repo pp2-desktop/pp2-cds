@@ -113,6 +113,8 @@ void vs_room::leave_user(user_ptr user) {
     }
 
     user->destroy_vs_room();
+  } else {
+    
   }
 
 }
@@ -127,4 +129,10 @@ bool vs_room::set_is_opponent_ready() {
 void vs_room::reset() {
   room_status = LOBBY;
   is_opponent_ready_ = false;
+}
+
+
+void vs_room::change_status(ROOM_STATUS rs) {
+  std::lock_guard<std::mutex> lock(m);
+  room_status = rs;
 }

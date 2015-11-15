@@ -6,6 +6,7 @@
 #include <boost/asio.hpp>
 #include "cd_user.hpp"
 #include "json11.hpp"
+#include <atomic>
 
 using namespace json11;
 
@@ -21,31 +22,76 @@ struct vec2 {
   Json to_json() const { return Json::array { x, y }; }
 };
 
-class round {
-  std::string img;
-  int diff_cnt;
-  std::vector<vec2> diff_positions;
-public:
-  round() {
-    img = "";
-    diff_cnt = -1;
-  }
+enum VS_PLAY_WINNER_TYPE { MASTER, OPPONENT, UNKNOWN };
 
-  bool loading_round() {
-    for(auto i=0; i<5; i++) {
-      diff_positions.push_back(vec2(10, 10));
-    }
-    return true;
+class vs_round {
+public:
+  std::vector<VS_PLAY_WINNER_TYPE> find_spot_user;
+  VS_PLAY_WINNER_TYPE winner;
+  std::string img;
+  std::vector<vec2> vpoints;
+  std::atomic<int> ready_cnt;
+
+  vs_round() : ready_cnt(0) {}
+  ~vs_round() {}
+
+  vs_round(const vs_round& vr) {
+    this->ready_cnt.store(vr.ready_cnt.load());
   }
 
 };
 
+class vs_round_info {
+public:
+  std::mutex m;
+
+  std::vector<vs_round> rounds;
+  std::atomic<int> current_round;
+
+  vs_round_info() {
+    current_round = 0;
+    rounds.clear();
+  }
+
+  int get_vs_current_round() { return current_round+1; }
+  
+  void set_round_info() {
+    vs_round vr;
+    vr.winner = UNKNOWN;
+    vr.img = "test.jpg";
+
+    vr.vpoints.push_back(vec2(10, 11));
+    vr.vpoints.push_back(vec2(10, 20));    
+    vr.vpoints.push_back(vec2(20, 30));
+
+    for(unsigned i=0; i<vr.vpoints.size(); i++) {
+      vr.find_spot_user.push_back(UNKNOWN);
+    }
+    rounds.push_back(vr);
+  }
+
+  void pre_loading_round_info() {
+    std::lock_guard<std::mutex> lock(m);
+    if(rounds.empty()) {
+      for(auto i=0; i<5; i++) {
+	// loading
+	set_round_info();
+      }
+    }
+  }
+
+  int get_round_ready_cnt() {
+    return rounds[current_round].ready_cnt;
+  }
+  void inc_round_ready_cnt() {
+    ++rounds[current_round].ready_cnt;
+  }
+};
+
 class vs_room: public std::enable_shared_from_this<vs_room> {
 
-  enum ROOM_STATUS { LOBBY, PLAYING, END };
-
+private:
   std::mutex m;
-  ROOM_STATUS room_status;
   int rid_;
 
   bool is_opponent_ready_;
@@ -71,7 +117,13 @@ public:
   void reset();
 
   bool set_is_opponent_ready();
+
+  enum ROOM_STATUS { LOBBY, PLAYING, END };
+  void change_status(ROOM_STATUS rs);  
+
+  ROOM_STATUS room_status;
   
+  vs_round_info vs_round_info_;
 };
 
 #endif

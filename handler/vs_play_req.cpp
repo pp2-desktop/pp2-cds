@@ -10,20 +10,25 @@
 
 using namespace json11;
 
-bool round_info_req(std::shared_ptr<cd_user> user_ptr, Json) {
-
+bool round_info_req(std::shared_ptr<cd_user> user_ptr, Json payload) {
+  user_ptr->get_vs_room()->change_status(vs_room::PLAYING);
+  user_ptr->get_vs_room()->vs_round_info_.pre_loading_round_info();
   std::vector<Json> round_infos;
 
   for(auto i=0; i<5; i++) {
-    
-    std::string img0 = "test.png";
-    std::string img1 = "test2.png";
+    std::string img = "test.jpg";
+    std::string img0 = "left_" + img;
+    std::string img1 = "right_" + img;
 
     std::vector<int> points;
     points.push_back(10);
     points.push_back(11);
     points.push_back(10);
-    points.push_back(12);
+    points.push_back(20);
+    points.push_back(20);
+    points.push_back(30);
+
+
 
     Json round = Json::object({
 	{ "img0", img0 },
@@ -35,14 +40,27 @@ bool round_info_req(std::shared_ptr<cd_user> user_ptr, Json) {
   }
 
   Json tmp = round_infos;
- 
    
   Json res = Json::object({
-    { "type", "round_info_res" },
-    { "round_infos", tmp }
+      { "type", "round_info_res" },
+      { "round_infos", tmp }
     });
   
   user_ptr->send2(res);
+
+  return true;
+}
+
+bool start_round_req(std::shared_ptr<cd_user> user_ptr, Json payload) {
+  
+  if(user_ptr->get_vs_room()->vs_round_info_.get_round_ready_cnt() < 1) {
+    user_ptr->get_vs_room()->vs_round_info_.inc_round_ready_cnt();
+    std::cout << "[debug] 1명 대기 상태" << std::endl;
+  } else {
+    user_ptr->get_vs_room()->vs_round_info_.inc_round_ready_cnt();
+    std::cout << "[debug] 2명 대기 완료" << std::endl;    
+  }
+  //user_ptr->get_vs_room()->current_round++;
 
   return true;
 }
