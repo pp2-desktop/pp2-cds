@@ -35,7 +35,9 @@ public:
   vs_round() : ready_cnt(0) {}
   ~vs_round() {}
 
+  
   vs_round(const vs_round& vr) {
+    std::cout << "vs_round 복사 생성자 called" << std::endl;
     this->ready_cnt.store(vr.ready_cnt.load());
   }
 
@@ -49,35 +51,17 @@ public:
   std::atomic<int> current_round;
 
   vs_round_info() {
-    current_round = 0;
-    rounds.clear();
+    reset();
   }
 
   int get_vs_current_round() { return current_round+1; }
   
-  void set_round_info() {
-    vs_round vr;
-    vr.winner = UNKNOWN;
-    vr.img = "test.jpg";
+  void set_round_info();
+  void pre_loading_round_info();
 
-    vr.vpoints.push_back(vec2(10, 11));
-    vr.vpoints.push_back(vec2(10, 20));    
-    vr.vpoints.push_back(vec2(20, 30));
-
-    for(unsigned i=0; i<vr.vpoints.size(); i++) {
-      vr.find_spot_user.push_back(UNKNOWN);
-    }
-    rounds.push_back(vr);
-  }
-
-  void pre_loading_round_info() {
-    std::lock_guard<std::mutex> lock(m);
-    if(rounds.empty()) {
-      for(auto i=0; i<5; i++) {
-	// loading
-	set_round_info();
-      }
-    }
+  void reset() {
+    current_round = 0;
+    rounds.clear();
   }
 
   int get_round_ready_cnt() {
@@ -117,6 +101,8 @@ public:
   void reset();
 
   bool set_is_opponent_ready();
+
+  bool start_round();
 
   enum ROOM_STATUS { LOBBY, PLAYING, END };
   void change_status(ROOM_STATUS rs);  

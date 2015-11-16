@@ -113,6 +113,7 @@ void vs_room::leave_user(user_ptr user) {
     }
 
     user->destroy_vs_room();
+
   } else {
     
   }
@@ -125,14 +126,52 @@ bool vs_room::set_is_opponent_ready() {
   return is_opponent_ready_;
 }
 
-
 void vs_room::reset() {
   room_status = LOBBY;
   is_opponent_ready_ = false;
 }
 
-
 void vs_room::change_status(ROOM_STATUS rs) {
   std::lock_guard<std::mutex> lock(m);
   room_status = rs;
 }
+
+bool vs_room::start_round() {
+  int round_cnt = vs_round_info_.current_round;
+
+  json11::Json res = json11::Json::object {
+    { "type", "start_round_res" },
+    { "round_cnt", round_cnt },
+  };
+  master_user_ptr->send2(res);
+  opponent_user_ptr->send2(res);
+
+  return true;
+}
+
+void vs_round_info::set_round_info() {
+  vs_round vr;
+  vr.winner = UNKNOWN;
+  vr.img = "test.jpg";
+
+  vr.vpoints.push_back(vec2(10, 11));
+  vr.vpoints.push_back(vec2(10, 20));    
+  vr.vpoints.push_back(vec2(20, 30));
+
+  for(unsigned i=0; i<vr.vpoints.size(); i++) {
+    vr.find_spot_user.push_back(UNKNOWN);
+  }
+  //rounds.push_back(vr);
+  rounds.emplace_back(vr);
+}
+
+void vs_round_info::pre_loading_round_info() {
+  std::lock_guard<std::mutex> lock(m);
+  if(rounds.empty()) {
+    for(auto i=0; i<5; i++) {
+      // loading
+      set_round_info();
+    }
+  }
+}
+

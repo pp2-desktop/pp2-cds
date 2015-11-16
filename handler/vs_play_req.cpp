@@ -59,8 +59,11 @@ bool start_round_req(std::shared_ptr<cd_user> user_ptr, Json payload) {
   } else {
     user_ptr->get_vs_room()->vs_round_info_.inc_round_ready_cnt();
     std::cout << "[debug] 2명 대기 완료" << std::endl;    
+    bool r =user_ptr->get_vs_room()->start_round();
+    if(!r) {
+      std::cout << "[error] start_round_res 패킷 전송 실패" << std::endl;    
+    }
   }
-  //user_ptr->get_vs_room()->current_round++;
 
   return true;
 }
