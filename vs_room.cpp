@@ -66,7 +66,7 @@ void vs_room::join_as_opponent(user_ptr user) {
 
   json11::Json n = json11::Json::object {
     { "type", "join_opponent_notify" },
-    { "uid", user->get_uid()}
+    { "uid", user->get_uid_to_string()}
   };
   master_user_ptr->send2(n);
 }
@@ -104,7 +104,7 @@ void vs_room::leave_user(user_ptr user) {
 
       json11::Json n = json11::Json::object {
 	{ "type", "opponent_leave_notify" },
-	{ "uid", opponent_user_ptr->get_uid() },
+	{ "uid", opponent_user_ptr->get_uid_to_string() },
       };
       master_user_ptr->send2(n);
 

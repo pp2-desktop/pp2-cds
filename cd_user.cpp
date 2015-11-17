@@ -12,6 +12,7 @@ cd_user::cd_user(WsServer& server, std::shared_ptr<WsServer::Connection> connect
   is_seat_ = false;
   is_master_ = false;
   vs_room_ptr_ = nullptr;
+  alive_t_ = time(NULL);
 }
 
 cd_user::~cd_user() {

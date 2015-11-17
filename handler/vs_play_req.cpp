@@ -22,11 +22,13 @@ bool round_info_req(std::shared_ptr<cd_user> user_ptr, Json payload) {
 
     std::vector<int> points;
     points.push_back(10);
-    points.push_back(11);
     points.push_back(10);
-    points.push_back(20);
-    points.push_back(20);
-    points.push_back(30);
+
+    points.push_back(50);
+    points.push_back(50);
+
+    points.push_back(100);
+    points.push_back(100);
 
 
 

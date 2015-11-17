@@ -30,7 +30,9 @@ class cd_user: public std::enable_shared_from_this<cd_user> {
   bool is_master_;
   vs_room_ptr vs_room_ptr_;
 
-  std::string uid_;
+  //std::string uid_;
+  size_t uid_;
+  size_t alive_t_;
   
 public:
   cd_user(WsServer& server, std::shared_ptr<WsServer::Connection> connection_ptr);
@@ -60,8 +62,11 @@ public:
 
   void destroy_vs_room();
 
-  void set_uid(const std::string& uid) { uid_ = uid; }  
-  std::string get_uid() { return uid_; }
+  void set_uid(const size_t& uid) { uid_ = uid; }  
+  size_t get_uid() { return uid_; }
+  std::string get_uid_to_string() { return std::to_string(uid_); }
+  time_t get_alive_t() { return alive_t_; }
 };
 
 #endif
+

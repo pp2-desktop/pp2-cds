@@ -10,7 +10,7 @@ bool login_req(std::shared_ptr<cd_user> user_ptr, Json) {
 
   json11::Json res = json11::Json::object {
     { "type", "login_res" },
-    { "uid", user_ptr->get_uid() }
+    { "uid", user_ptr->get_uid_to_string() }
   };
 
   user_ptr->send2(res);
