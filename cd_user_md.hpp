@@ -25,7 +25,8 @@ public:
   }
 
   //bool init();
-  void check_alive();
+  void start_check_alive();
+  void stop_check_alive();
   bool add_user(size_t uid, user_ptr user);
   bool remove_user(size_t uid);
   bool get_users_size();

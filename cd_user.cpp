@@ -20,6 +20,7 @@ cd_user::~cd_user() {
 }
 
 void cd_user::set_is_seat(bool is_seat) {
+  alive_t_ = time(NULL);
   is_seat_ = is_seat;
 }
 

@@ -28,3 +28,8 @@ bool logout_req(std::shared_ptr<cd_user> user_ptr, Json) {
   user_ptr->send2(res);
   return true;
 }
+
+bool update_alive_req(std::shared_ptr<cd_user> user_ptr, Json) {
+  user_ptr->update_alive_t();
+  return true;
+}

@@ -26,6 +26,7 @@ bool cd_handler_md::init() {
   r &= add_payload("leave_room_req", leave_room_req);
   r &= add_payload("login_req", login_req);
   r &= add_payload("logout_req", logout_req);
+  r &= add_payload("update_alive_req", update_alive_req);
   r &= add_payload("opponent_ready_notify", opponent_ready_notify);
   r &= add_payload("start_vs_game_req", start_vs_game_req);
   r &= add_payload("round_info_req", round_info_req);

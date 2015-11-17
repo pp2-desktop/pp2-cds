@@ -15,7 +15,9 @@ int main() {
       vs_room_md::get().run(8);
     });
 
-  cd_user_md::get().check_alive();
+  std::thread t2( [] {
+      cd_user_md::get().start_check_alive();
+    });
 
   bool r = cd_handler_md::get().init();
   if(!r) {
@@ -59,8 +61,6 @@ int main() {
 	  }
 
 	}
-
-
       }
 
 
@@ -124,6 +124,13 @@ connection, send_stream);
     //See RFC 6455 7.4.1. for status codes
     echo.onclose=[](shared_ptr<WsServer::Connection> connection, int status, const string& reason) {
         cout << "Server: Closed connection " << (size_t)connection.get() << " with status code " << status << endl;
+	if(cd_user_md::get().remove_user(connection->cd_user_ptr->get_uid())) {
+
+	std::cout << "[debug] 유저매니져 유저 삭제 성공" << std::endl;
+	std::cout << "[debug] 유저매니져 사이즈: " << cd_user_md::get().get_users_size() << std::endl;
+	} else {
+	  std::cout << "[error] 유저매니져 유저 삭제 실패" << std::endl;
+	}
 	connection->cd_user_ptr->destory();
 	connection->cd_user_ptr = nullptr;
     };
@@ -133,6 +140,12 @@ connection, send_stream);
         cout << "Server: Error in connection " << (size_t)connection.get() << ". " << 
                 "Error: " << ec << ", error message: " << ec.message() << endl;
 
+	if(cd_user_md::get().remove_user(connection->cd_user_ptr->get_uid())) {
+	std::cout << "[debug] 유저매니져 유저 삭제 성공" << std::endl;
+	std::cout << "[debug] 유저매니져 사이즈: " << cd_user_md::get().get_users_size() << std::endl;	
+	} else {
+	  std::cout << "[error] 유저매니져 유저 삭제 실패" << std::endl;	  
+	}
 	connection->cd_user_ptr->destory();
 	connection->cd_user_ptr = nullptr;
     };
@@ -169,6 +182,8 @@ connection, send_stream);
 
     
     server_thread.join();
+    cd_user_md::get().stop_check_alive();
+    t2.join();
     t.join();
     
     return 0;

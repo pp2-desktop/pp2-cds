@@ -66,6 +66,7 @@ public:
   size_t get_uid() { return uid_; }
   std::string get_uid_to_string() { return std::to_string(uid_); }
   time_t get_alive_t() { return alive_t_; }
+  void update_alive_t() { alive_t_ = time(NULL); }
 };
 
 #endif
