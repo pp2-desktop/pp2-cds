@@ -149,29 +149,122 @@ bool vs_room::start_round() {
   return true;
 }
 
-void vs_round_info::set_round_info() {
-  vs_round vr;
-  vr.winner = UNKNOWN;
-  vr.img = "test.jpg";
-
-  vr.vpoints.push_back(vec2(10, 11));
-  vr.vpoints.push_back(vec2(10, 20));    
-  vr.vpoints.push_back(vec2(20, 30));
-
-  for(unsigned i=0; i<vr.vpoints.size(); i++) {
-    vr.find_spot_user.push_back(UNKNOWN);
+void vs_room::find_spot(int round_cnt, int index, VS_PLAY_WINNER_TYPE winner_type) {
+  std::lock_guard<std::mutex> lock(m);
+  
+  if(round_cnt != vs_round_info_.current_round) {
+    std::cout << "[error] 유저가 보낸 라운드랑 현재 라운드랑 다름" << std::endl;
+    return;
   }
-  //rounds.push_back(vr);
-  rounds.emplace_back(vr);
+
+  
+  auto round = vs_round_info_.get_round();
+  if(round) {
+    bool is_find = round->is_find_spot_user(index, winner_type);
+  
+    // 만약 유저가 찾았다면 이번이 마지막인지 확인해야함
+    if (is_find) {
+      std::cout << "[debug] 유저가 찾음" << std::endl;
+      // 라운드가 종료 했는지 체크
+      bool is_end_round = round->check_end_round();
+      if (is_end_round) {
+	VS_PLAY_WINNER_TYPE winner = round->get_winner();
+      } else {
+	json11::Json res = json11::Json::object {
+	  { "type", "find_spot_res" },
+	  { "round_cnt", round_cnt },
+	  { "index", index },
+	  { "winner_type", winner_type },
+	  { "is_end_round" , false },
+	  { "is_end_vs_play" , false }
+	};
+	master_user_ptr->send2(res);
+	opponent_user_ptr->send2(res);
+      }
+    } else {
+      std::cout << "[debug] 유저가 못찾음" << std::endl;
+      // 유저가 못찾으면 답장 안해줌?
+    }
+  } else {
+    std::cout << "[debug] 좆됨" << std::endl;
+  }
+  
+}
+
+void vs_round_info::set_round_info() {
+
+  std::unique_ptr<vs_round> vr(new vs_round);
+
+  vr->winner = UNKNOWN;
+  vr->img = "test.jpg";
+
+  vr->vpoints.push_back(vec2(10, 11));
+  vr->vpoints.push_back(vec2(10, 20));    
+  vr->vpoints.push_back(vec2(20, 30));
+
+  for(unsigned i=0; i<vr->vpoints.size(); i++) {
+    vr->find_spot_users.push_back(UNKNOWN);
+  }
+  std::cout << "rounds size: " << rounds.size() << std::endl;
+
+  rounds.push_back(std::move(vr));
+
+  std::cout << "xxxxxxxxxxxxxxxxxxxxxx" << std::endl;
+  //rounds.emplace_back(vr);
 }
 
 void vs_round_info::pre_loading_round_info() {
   std::lock_guard<std::mutex> lock(m);
-  if(rounds.empty()) {
+  if (rounds.empty()) {
+    std::cout << "[debug] 라운드 로딩" << std::endl;
     for(auto i=0; i<5; i++) {
       // loading
       set_round_info();
     }
+  } else {
+    std::cout << "[debug] 라운드가 미리 로딩되 있음" << std::endl;
   }
 }
 
+bool vs_round::is_find_spot_user(int index, VS_PLAY_WINNER_TYPE winner_type) {
+  //std::lock_guard<std::mutex> lock(m);
+  if(find_spot_users.size() < static_cast<unsigned>(index)) {
+    std::cout << "[error] is_find_spot_user 문제 발생" << std::endl;
+    return false;
+  }
+
+  if(find_spot_users[index] == UNKNOWN) {
+    find_spot_users[index] = winner_type;
+    return true;
+  }
+
+  return false;
+}
+
+bool vs_round::check_end_round() {
+  for(unsigned i=0; i<find_spot_users.size(); i++) {
+    if(find_spot_users[i] == UNKNOWN) {
+      return false;
+    }
+  }
+  return true;
+}
+
+VS_PLAY_WINNER_TYPE vs_round::get_winner() {
+  auto master_cnt = 0;
+  auto opponent_cnt = 0;
+  for(unsigned i=0; i<find_spot_users.size(); i++) {
+    if(find_spot_users[i] == MASTER) {
+      master_cnt++;
+    } else if(find_spot_users[i] == OPPONENT) {
+      opponent_cnt++;
+    } else {
+      std::cout << "[error] get winner 문제 발생" << std::endl;
+    }
+  }
+
+  if(opponent_cnt < master_cnt) {
+    return MASTER;
+  }
+  return OPPONENT;
+}

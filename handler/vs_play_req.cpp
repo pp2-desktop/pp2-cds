@@ -21,14 +21,14 @@ bool round_info_req(std::shared_ptr<cd_user> user_ptr, Json payload) {
     std::string img1 = "right_" + img;
 
     std::vector<int> points;
-    points.push_back(10);
-    points.push_back(10);
+    points.push_back(113);
+    points.push_back(131);
 
-    points.push_back(50);
-    points.push_back(50);
+    points.push_back(281);
+    points.push_back(269);
 
-    points.push_back(100);
-    points.push_back(100);
+    points.push_back(506);
+    points.push_back(306);
 
 
 
@@ -65,6 +65,19 @@ bool start_round_req(std::shared_ptr<cd_user> user_ptr, Json payload) {
     if(!r) {
       std::cout << "[error] start_round_res 패킷 전송 실패" << std::endl;    
     }
+  }
+
+  return true;
+}
+
+bool find_spot_req(std::shared_ptr<cd_user> user_ptr, Json payload) {
+  int round_cnt = payload["round_cnt"].int_value();
+  int index = payload["index"].int_value();
+
+  if(user_ptr->get_is_master()) {
+    user_ptr->get_vs_room()->find_spot(round_cnt, index, MASTER);
+  } else {
+    user_ptr->get_vs_room()->find_spot(round_cnt, index, OPPONENT);
   }
 
   return true;

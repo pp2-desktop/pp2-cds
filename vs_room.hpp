@@ -7,6 +7,7 @@
 #include "cd_user.hpp"
 #include "json11.hpp"
 #include <atomic>
+#include <memory>
 
 using namespace json11;
 
@@ -26,11 +27,12 @@ enum VS_PLAY_WINNER_TYPE { MASTER, OPPONENT, UNKNOWN };
 
 class vs_round {
 public:
-  std::vector<VS_PLAY_WINNER_TYPE> find_spot_user;
+  std::vector<VS_PLAY_WINNER_TYPE> find_spot_users;
   VS_PLAY_WINNER_TYPE winner;
   std::string img;
   std::vector<vec2> vpoints;
   std::atomic<int> ready_cnt;
+  //std::vector<bool, VS_PLAY_WINNER_TYPE> find_spots;
 
   vs_round() : ready_cnt(0) {}
   ~vs_round() {}
@@ -41,13 +43,22 @@ public:
     this->ready_cnt.store(vr.ready_cnt.load());
   }
 
+  vs_round(const vs_round&& vr) {
+    std::cout << "vs_round move 생성자 called" << std::endl;
+    this->ready_cnt.store(vr.ready_cnt.load());
+  }
+
+  bool is_find_spot_user(int index, VS_PLAY_WINNER_TYPE winner_type);
+  bool check_end_round();
+  VS_PLAY_WINNER_TYPE get_winner();
+  
 };
 
 class vs_round_info {
 public:
   std::mutex m;
 
-  std::vector<vs_round> rounds;
+  std::vector<std::unique_ptr<vs_round>> rounds;
   std::atomic<int> current_round;
 
   vs_round_info() {
@@ -65,11 +76,18 @@ public:
   }
 
   int get_round_ready_cnt() {
-    return rounds[current_round].ready_cnt;
+    return rounds[current_round]->ready_cnt;
   }
   void inc_round_ready_cnt() {
-    ++rounds[current_round].ready_cnt;
+    ++rounds[current_round]->ready_cnt;
   }
+
+  vs_round* get_round() { 
+    std::lock_guard<std::mutex> lock(m);
+    return rounds[current_round].get();
+  }
+  
+  //void find_spot(int stage, int index, VS_PLAY_WINNER_TYPE winner_type);
 };
 
 class vs_room: public std::enable_shared_from_this<vs_room> {
@@ -108,6 +126,8 @@ public:
   void change_status(ROOM_STATUS rs);  
 
   ROOM_STATUS room_status;
+
+  void find_spot(int round_cnt, int index, VS_PLAY_WINNER_TYPE winner_type);
   
   vs_round_info vs_round_info_;
 };

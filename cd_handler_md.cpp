@@ -31,6 +31,7 @@ bool cd_handler_md::init() {
   r &= add_payload("start_vs_game_req", start_vs_game_req);
   r &= add_payload("round_info_req", round_info_req);
   r &= add_payload("start_round_req", start_round_req);
+  r &= add_payload("find_spot_req", find_spot_req);
 
   std::cout << r << std::endl;
   return r;
