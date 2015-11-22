@@ -35,7 +35,9 @@ public:
   //std::vector<bool, VS_PLAY_WINNER_TYPE> find_spots;
 
   vs_round() : ready_cnt(0) {}
-  ~vs_round() {}
+  ~vs_round() {
+    std::cout << "vs_round 소멸자 called" << std::endl;
+  }
 
   
   vs_round(const vs_round& vr) {
@@ -51,7 +53,11 @@ public:
   bool is_find_spot_user(int index, VS_PLAY_WINNER_TYPE winner_type);
   bool check_end_round();
   VS_PLAY_WINNER_TYPE get_winner();
-  
+  void set_winner(VS_PLAY_WINNER_TYPE round_winner) {
+    winner = round_winner;
+  }
+ 
+  //VS_PLAY_WINNER_TYPE get_winner_type() { return winner_; }
 };
 
 class vs_round_info {
@@ -86,6 +92,8 @@ public:
     std::lock_guard<std::mutex> lock(m);
     return rounds[current_round].get();
   }
+
+  VS_PLAY_WINNER_TYPE get_winner();
   
   //void find_spot(int stage, int index, VS_PLAY_WINNER_TYPE winner_type);
 };

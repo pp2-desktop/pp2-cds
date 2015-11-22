@@ -14,9 +14,15 @@ bool round_info_req(std::shared_ptr<cd_user> user_ptr, Json payload) {
   user_ptr->get_vs_room()->change_status(vs_room::PLAYING);
   user_ptr->get_vs_room()->vs_round_info_.pre_loading_round_info();
   std::vector<Json> round_infos;
-
+  
+  // 나중에 pre_loading_round_info를 기반으로 이 패킷을 만들어야함
   for(auto i=0; i<5; i++) {
     std::string img = "test.jpg";
+    
+    if(i==1) {
+      img = "2.jpg";
+    }
+
     std::string img0 = "left_" + img;
     std::string img1 = "right_" + img;
 
@@ -54,6 +60,9 @@ bool round_info_req(std::shared_ptr<cd_user> user_ptr, Json payload) {
 }
 
 bool start_round_req(std::shared_ptr<cd_user> user_ptr, Json payload) {
+
+  int round_cnt = payload["round_cnt"].int_value();
+  std::cout << "유저 라운드: " << round_cnt << std::endl;
   
   if(user_ptr->get_vs_room()->vs_round_info_.get_round_ready_cnt() < 1) {
     user_ptr->get_vs_room()->vs_round_info_.inc_round_ready_cnt();
@@ -61,7 +70,7 @@ bool start_round_req(std::shared_ptr<cd_user> user_ptr, Json payload) {
   } else {
     user_ptr->get_vs_room()->vs_round_info_.inc_round_ready_cnt();
     std::cout << "[debug] 2명 대기 완료" << std::endl;    
-    bool r =user_ptr->get_vs_room()->start_round();
+    bool r = user_ptr->get_vs_room()->start_round();
     if(!r) {
       std::cout << "[error] start_round_res 패킷 전송 실패" << std::endl;    
     }

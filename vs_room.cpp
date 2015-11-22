@@ -167,8 +167,55 @@ void vs_room::find_spot(int round_cnt, int index, VS_PLAY_WINNER_TYPE winner_typ
       std::cout << "[debug] 유저가 찾음" << std::endl;
       // 라운드가 종료 했는지 체크
       bool is_end_round = round->check_end_round();
+
       if (is_end_round) {
-	VS_PLAY_WINNER_TYPE winner = round->get_winner();
+	VS_PLAY_WINNER_TYPE round_winner_type = round->get_winner();
+
+	// 경기 끝난거 확인하기
+	bool is_end_vs_play = false;
+	
+	if(!is_end_vs_play) {
+	  json11::Json res = json11::Json::object {
+	    { "type", "find_spot_res" },
+	    { "round_cnt", round_cnt },
+	    { "index", index },
+	    { "winner_type", winner_type },
+	    { "is_end_round" , true },
+	    { "round_winner_type", round_winner_type },
+	    { "is_end_vs_play" , false }
+	  };
+
+	  // 다음 라운드로 진행
+	  vs_round_info_.current_round++;
+
+	  master_user_ptr->send2(res);
+	  opponent_user_ptr->send2(res);
+
+	} else {
+	  VS_PLAY_WINNER_TYPE vs_play_winner_type = vs_round_info_.get_winner();
+	  if(vs_play_winner_type == UNKNOWN) {
+	    std::cout << "[error] vs_play 승자 찾던중 문제 발생" << std::endl; 
+	    return;
+	  }
+
+	  json11::Json res = json11::Json::object {
+	    { "type", "find_spot_res" },
+	    { "round_cnt", round_cnt },
+	    { "index", index },
+	    { "winner_type", winner_type },
+	    { "is_end_round" , true },
+	    { "round_winner_type", round_winner_type },
+	    { "is_end_vs_play" , true },
+	    { "vs_play_winner_type", vs_play_winner_type },
+	  };
+
+	  // round_info 정리
+	  vs_round_info_.reset();
+
+	  master_user_ptr->send2(res);
+	  opponent_user_ptr->send2(res);
+	}
+
       } else {
 	json11::Json res = json11::Json::object {
 	  { "type", "find_spot_res" },
@@ -221,9 +268,37 @@ void vs_round_info::pre_loading_round_info() {
       // loading
       set_round_info();
     }
+
+    // 잠시 테스트
+    rounds[1]->img = "2.jpg";
+    
+    // 겹치는 이미지 있는지 확인해서 다시 불러주기
+
   } else {
     std::cout << "[debug] 라운드가 미리 로딩되 있음" << std::endl;
   }
+}
+
+VS_PLAY_WINNER_TYPE vs_round_info::get_winner() {
+  auto master_cnt = 0;
+  auto opponent_cnt = 0;
+  for(auto& r: rounds) {
+    if(MASTER == r->get_winner()) {
+      master_cnt++;
+    } else if(OPPONENT == r->get_winner()) {
+      opponent_cnt++;
+    } else {
+      std::cout << "[error] vs_play 승자 계산중 문제 발생" << std::endl;
+      return UNKNOWN;
+    }
+  }
+
+  if(master_cnt < opponent_cnt) {
+    std::cout << "[debug] vs_play 승자: opponent" << std::endl;
+    return OPPONENT;
+  } 
+  std::cout << "[debug] vs_play 승자: master" << std::endl;
+  return MASTER;
 }
 
 bool vs_round::is_find_spot_user(int index, VS_PLAY_WINNER_TYPE winner_type) {
@@ -264,7 +339,9 @@ VS_PLAY_WINNER_TYPE vs_round::get_winner() {
   }
 
   if(opponent_cnt < master_cnt) {
+    set_winner(MASTER);
     return MASTER;
   }
+  set_winner(OPPONENT);
   return OPPONENT;
 }
