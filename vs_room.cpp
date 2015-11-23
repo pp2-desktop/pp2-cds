@@ -27,6 +27,13 @@ bool vs_room::is_full() {
   return true ;
 }
 
+bool vs_room::is_playing() {
+  if(room_status == LOBBY) {
+    return false;
+  }
+  return true;
+}
+
 int vs_room::get_id() {
   return rid_;
 }
@@ -115,7 +122,38 @@ void vs_room::leave_user(user_ptr user) {
     user->destroy_vs_room();
 
   } else {
+
+    // 게임진행 중일때 유저가 나가는 상황
+    std::cout << "[debug] 게임진행중 유저 나감" << std::endl;
+    if(master_user_ptr != nullptr && opponent_user_ptr != nullptr) {
+      json11::Json n = json11::Json::object {
+	{ "type", "other_leave_notify" }
+      };
+
+      std::cout << "[debug] 둘중 1명 나감" << std::endl;
     
+      if(master_user_ptr.get() == user.get()) {
+	opponent_user_ptr->send2(n);
+	master_user_ptr.reset();
+	master_user_ptr = nullptr;
+      } else {
+	master_user_ptr->send2(n);
+	opponent_user_ptr.reset();
+	opponent_user_ptr = nullptr;
+      }
+    } else {
+      std::cout << "[debug] 나머지 1명 나감" << std::endl;
+
+      if(master_user_ptr.get() == user.get()) {
+	master_user_ptr.reset();
+	master_user_ptr = nullptr;
+      } else {
+	opponent_user_ptr.reset();
+	opponent_user_ptr = nullptr;
+      } 
+    }
+
+    user->destroy_vs_room();    
   }
 
 }
@@ -154,6 +192,8 @@ void vs_room::find_spot(int round_cnt, int index, VS_PLAY_WINNER_TYPE winner_typ
   
   if(round_cnt != vs_round_info_.current_round) {
     std::cout << "[error] 유저가 보낸 라운드랑 현재 라운드랑 다름" << std::endl;
+    std::cout << "[error] 유저 라운드: " << round_cnt << std::endl;
+    std::cout << "[error] 서버 라운드: " << vs_round_info_.current_round << std::endl;
     return;
   }
 
@@ -170,9 +210,10 @@ void vs_room::find_spot(int round_cnt, int index, VS_PLAY_WINNER_TYPE winner_typ
 
       if (is_end_round) {
 	VS_PLAY_WINNER_TYPE round_winner_type = round->get_winner();
-
+	
+	vs_round_info_.current_round++;
 	// 경기 끝난거 확인하기
-	bool is_end_vs_play = false;
+	bool is_end_vs_play = vs_round_info_.check_end_vs_play();
 	
 	if(!is_end_vs_play) {
 	  json11::Json res = json11::Json::object {
@@ -184,9 +225,6 @@ void vs_room::find_spot(int round_cnt, int index, VS_PLAY_WINNER_TYPE winner_typ
 	    { "round_winner_type", round_winner_type },
 	    { "is_end_vs_play" , false }
 	  };
-
-	  // 다음 라운드로 진행
-	  vs_round_info_.current_round++;
 
 	  master_user_ptr->send2(res);
 	  opponent_user_ptr->send2(res);
@@ -211,6 +249,7 @@ void vs_room::find_spot(int round_cnt, int index, VS_PLAY_WINNER_TYPE winner_typ
 
 	  // round_info 정리
 	  vs_round_info_.reset();
+	  room_status = LOBBY;
 
 	  master_user_ptr->send2(res);
 	  opponent_user_ptr->send2(res);

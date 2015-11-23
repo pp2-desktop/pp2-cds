@@ -19,9 +19,11 @@ bool round_info_req(std::shared_ptr<cd_user> user_ptr, Json payload) {
   for(auto i=0; i<5; i++) {
     std::string img = "test.jpg";
     
+    /*
     if(i==1) {
       img = "2.jpg";
     }
+    */
 
     std::string img0 = "left_" + img;
     std::string img1 = "right_" + img;

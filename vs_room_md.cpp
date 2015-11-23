@@ -36,7 +36,7 @@ void vs_room_md::join_room(user_ptr user) {
   std::lock_guard<std::mutex> lock(mu);
   
   for(auto& p : vs_rooms) {
-    if(!p.second->is_full()) {
+    if(!p.second->is_full() && !p.second->is_playing()) {
       // 방에 자리가 있다면
       std::cout << "[debug] 유저가 있어서 상대로 들어감" << std::endl;
       p.second->join_as_opponent(user);

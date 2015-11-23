@@ -71,7 +71,7 @@ public:
     reset();
   }
 
-  int get_vs_current_round() { return current_round+1; }
+  //int get_vs_current_round() { return current_round+1; }
   
   void set_round_info();
   void pre_loading_round_info();
@@ -94,6 +94,13 @@ public:
   }
 
   VS_PLAY_WINNER_TYPE get_winner();
+
+  bool check_end_vs_play() {
+    if(current_round >= static_cast<int>(rounds.size())) {
+      return true;
+    }
+    return false;
+  }
   
   //void find_spot(int stage, int index, VS_PLAY_WINNER_TYPE winner_type);
 };
@@ -116,6 +123,7 @@ public:
 
 
   bool is_full();
+  bool is_playing();
   int get_id();
 
   void join_as_master(user_ptr user);
