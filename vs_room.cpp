@@ -31,6 +31,7 @@ bool vs_room::is_playing() {
   if(room_status == LOBBY) {
     return false;
   }
+
   return true;
 }
 
@@ -126,16 +127,22 @@ void vs_room::leave_user(user_ptr user) {
     // 게임진행 중일때 유저가 나가는 상황
     std::cout << "[debug] 게임진행중 유저 나감" << std::endl;
     if(master_user_ptr != nullptr && opponent_user_ptr != nullptr) {
-      json11::Json n = json11::Json::object {
-	{ "type", "other_leave_notify" }
-      };
 
       std::cout << "[debug] 둘중 1명 나감" << std::endl;
+
+      json11::Json n = json11::Json::object {
+	{ "type", "other_leave_notify" },
+	{ "is_master", "true" }
+      };
     
       if(master_user_ptr.get() == user.get()) {
+
 	opponent_user_ptr->send2(n);
 	master_user_ptr.reset();
 	master_user_ptr = nullptr;
+	master_user_ptr = opponent_user_ptr;
+	opponent_user_ptr.reset();
+	opponent_user_ptr = nullptr;
       } else {
 	master_user_ptr->send2(n);
 	opponent_user_ptr.reset();
@@ -275,6 +282,12 @@ void vs_room::find_spot(int round_cnt, int index, VS_PLAY_WINNER_TYPE winner_typ
     std::cout << "[debug] 좆됨" << std::endl;
   }
   
+}
+
+void vs_room::play_to_lobby() {
+  std::lock_guard<std::mutex> lock(m);
+  //vs_round_info_.reset();
+  room_status = LOBBY;
 }
 
 void vs_round_info::set_round_info() {

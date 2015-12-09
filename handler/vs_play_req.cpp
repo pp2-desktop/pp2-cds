@@ -11,7 +11,7 @@
 using namespace json11;
 
 bool round_info_req(std::shared_ptr<cd_user> user_ptr, Json payload) {
-  user_ptr->get_vs_room()->change_status(vs_room::PLAYING);
+  //user_ptr->get_vs_room()->change_status(vs_room::PLAYING);
   user_ptr->get_vs_room()->vs_round_info_.pre_loading_round_info();
   std::vector<Json> round_infos;
   
@@ -90,6 +90,18 @@ bool find_spot_req(std::shared_ptr<cd_user> user_ptr, Json payload) {
   } else {
     user_ptr->get_vs_room()->find_spot(round_cnt, index, OPPONENT);
   }
+
+  return true;
+}
+
+bool play_to_lobby_req(std::shared_ptr<cd_user> user_ptr, Json payload) {
+  user_ptr->get_vs_room()->play_to_lobby();
+
+  Json res = Json::object({
+      { "type", "play_to_lobby_res" }
+    });
+  
+  user_ptr->send2(res);
 
   return true;
 }

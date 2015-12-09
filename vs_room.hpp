@@ -144,6 +144,7 @@ public:
   ROOM_STATUS room_status;
 
   void find_spot(int round_cnt, int index, VS_PLAY_WINNER_TYPE winner_type);
+  void play_to_lobby();
   
   vs_round_info vs_round_info_;
 };
