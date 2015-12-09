@@ -1,4 +1,5 @@
 //#include "server_ws.hpp"
+#include "log4cxx_md.hpp"
 #include "vs_room_md.hpp"
 #include "cd_handler_md.hpp"
 #include "cd_user_md.hpp"
@@ -10,6 +11,17 @@ typedef SocketServer<WS> WsServer;
 //typedef SimpleWeb::SocketClient<SimpleWeb::WS> WsClient;
 
 int main() {
+
+  log4cxx_md::get().init();
+  ws_logt("testt");
+  ws_logd("testd");
+  ws_logi("testiu");
+  ws_logw("testw");
+  ws_loge("teste");
+  ws_logf("testf");
+
+  payload_logd("test payload");
+
 
   std::thread t( [] {
       vs_room_md::get().run(8);
