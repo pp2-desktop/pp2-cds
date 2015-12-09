@@ -4,3 +4,4 @@ CMakeFiles/
 CMakeLists.txt
 .sconsign.dblite
 build/
+log/
